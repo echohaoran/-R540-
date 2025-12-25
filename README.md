@@ -1,6 +1,51 @@
-# -R540-
-戴尔服务器R540风扇控制脚本
+# 戴尔服务器r540风扇控制脚本
 
+> iDRAC8无法细致调整风扇转速，导致在家用的时候噪音极大。所以可以使用IPMI进行管理。
+
+## 配置
+戴尔r540
+系统：PVE（同理各种Linux）
+
+## ipmitool基础语法
+```shell
+ipmitool -I lanplus -H <iDRAC_IP> -U <username> -P <password> raw 0x30 0x30 0x02 0x00 <speed>
+```
+---
+
+因为ipmitool进行风扇管理时，需要使用十六进制，以下为对应关系：
+
+｜转速百分比｜十六进制｜
+｜---------｜---------｜
+｜0%｜0x00|
+｜10%｜0x0A|
+｜20%｜0x14|
+｜30%｜0x1E|
+｜40%｜0x28|
+｜50%｜0x32|
+｜60%｜0x3C|
+｜70%｜0x46|
+｜80%｜0x50|
+｜90%｜0x5A|
+｜100%｜0x64|
+
+### 示例：
+```shell
+# 启用手动模式
+ipmitool -I lanplus -H 192.168.1.100 -U root -P calvin raw 0x30 0x30 0x01 0x00
+
+# 设置转速为 35%（十进制 35 = 0x23）
+ipmitool -I lanplus -H 192.168.1.100 -U root -P calvin raw 0x30 0x30 0x02 0x00 0x23
+```
+
+### 恢复自动风扇控制
+
+```shell
+ipmitool -I lanplus -H <iDRAC_IP> -U <user> -P <pass> raw 0x30 0x30 0x01 0x01
+```
+
+
+## 完整脚本带控速，需要修改转速和温度关系自己修改即可
+> 记得修改文中iDRAC的ip、用户名、密码
 
 ```shell
 #!/bin/bash
